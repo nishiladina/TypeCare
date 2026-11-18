@@ -1,8 +1,7 @@
 from pathlib import Path
 
-# Home Path
-HOME_PATH = Path.home()
-ours = HOME_PATH / "TypeCare"
+# Base Path: works seamlessly both inside Docker (/home/TypeCare) and in any cloned directory
+ours = Path(__file__).resolve().parent
 
 # Prediction Path
 PRED_PATH = ours / "prediction"
@@ -36,3 +35,8 @@ TYPET5_OUTPUT_PATH = OUTPUT_PATH / "typet5_result.pkl"
 # Configuration for Example
 EXAMPLE_TRANSFORM_PATH = PRED_PATH / "Example" / "transformed_result.json"
 EXAMPLE_OUTPUT_PATH = OUTPUT_PATH / "example_result.pkl"
+
+# Configuration for Type4Py
+TYPE4PY_PATH = PRED_PATH / "Type4Py"
+TYPE4PY_TRANSFORM_PATH = PRED_PATH / "Type4Py" / "transformed_result.json"
+TYPE4PY_OUTPUT_PATH = OUTPUT_PATH / "type4py_result.pkl"

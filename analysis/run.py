@@ -21,6 +21,8 @@ from config import (
     TYPEGEN_OUTPUT_PATH,
     EXAMPLE_TRANSFORM_PATH,
     EXAMPLE_OUTPUT_PATH,
+    TYPE4PY_TRANSFORM_PATH,
+    TYPE4PY_OUTPUT_PATH,
     MODEL_PATH
 )
     
@@ -1161,6 +1163,92 @@ class TigerAnalysis:
         self.problem_list.print_arg_ret_top_k()
 
 
+class Type4PyAnalysis(TigerAnalysis):
+    tool_name = "Type4Py"
+
+    def get_result_path(self, repo_name, file_path, target, param):
+        folder_name = output_folder_name(repo_name, file_path)
+        path = DATA_PATH / "Type4Py" / folder_name / target.replace('.', '_') / param
+        if not path.exists():
+            folder_name = output_folder_name(repo_name, "src/" + file_path)
+            path = DATA_PATH / "Type4Py" / folder_name / target.replace('.', '_') / param
+
+        if not path.exists():
+            return None
+
+        return path
+
+    def load_transformed_data(self):
+        error_num = 0
+        logger.info("Loading Type4Py transformed prediction results...")
+        problem_list = ProblemList()
+        result_path = TYPE4PY_TRANSFORM_PATH
+
+        with open(result_path, "r") as f:
+            type4py_results = json.load(f)
+
+        logger.info("Type4Py transformed prediction results loaded: %i projects", len(type4py_results))
+
+        for i, data in enumerate(type4py_results):
+            if i % 1000 == 0:
+                logger.info(f"({i+1}/{len(type4py_results)}) Processing {data['repo_name']}")
+
+            repo_name = data['repo_name']
+            file_path = data["file_path"]
+
+            target = data['target']
+            params = data['params']
+            preds = data['predictions']
+            expects = data['expects']
+
+            cat = data['cat']
+            generic = data['generic']
+            total_preds = data['total_predictions']
+
+            result_path = self.get_result_path(repo_name, file_path, target, params[0])
+            if result_path is None:
+                error_num += 1
+                continue
+
+            file_info_json = result_path / "file_info.json"
+            info_json = result_path / "info.json"
+
+            if not os.path.exists(info_json):
+                error_num += 1
+                continue
+
+            with open(info_json, 'r') as f:
+                info = json.load(f)
+
+            correct_num_list = info['correct']
+            modified_preds = preds
+
+            none_idx = [i for i, expect in enumerate(expects) if expect is None]
+            expects = [str(parse_type_str(expect)) for i, expect in enumerate(expects) if i not in none_idx]
+            preds = []
+            for pred in modified_preds:
+                new_pred = []
+                for i, x in enumerate(pred):
+                    if i in none_idx:
+                        continue
+                    try:
+                        modified_type = str(parse_type_str(x))
+                    except Exception as e:
+                        modified_type = x
+                    new_pred.append(modified_type)
+                preds.append(new_pred)
+
+            params = [param for i, param in enumerate(params) if i not in none_idx]
+
+            problem = Problem(repo_name, file_path, result_path, target, correct_num_list, params, preds, expects, cat=cat, generic=generic, total_preds=total_preds)
+            prob_len = min(len(problem.preds), 10)
+            before_solutions = [i for i in range(prob_len)]
+            problem.set_before_solutions(before_solutions)
+
+            problem_list.add_problem(problem)
+        return problem_list
+
+
 class ExampleAnalysis:
     tool_name = "Example"
     problem_list: ProblemList
@@ -1516,6 +1604,24 @@ def analysis_tiger():
     print()
     tiger_analysis.print_arg_ret_top_k()
 
+def analysis_type4py():
+    type4py_analysis = Type4PyAnalysis()
+    type4py_analysis.get_after_solutions()
+
+    with open(TYPE4PY_OUTPUT_PATH, 'wb') as f:
+        pickle.dump(type4py_analysis, f)
+
+    print("Top K")
+    type4py_analysis.print_top_k()
+    print()
+    print("Base Top K")
+    type4py_analysis.print_base_top_k()
+    print()
+    type4py_analysis.print_categorized_top_k()
+    print()
+    type4py_analysis.print_arg_ret_top_k()
+
+
 def analysis_example():
     example_analysis = ExampleAnalysis()
     example_analysis.get_after_solutions()
@@ -1580,3 +1686,5 @@ if __name__ == "__main__":
             analysis_tiger()
         elif args.tool == "example":
             analysis_example()
+        elif args.tool == "type4py":
+            analysis_type4py()

@@ -10,3 +10,9 @@
 ### 11/17
 - loaded the ONNX model, W2V embeddings, and Annoy clusters, extracted code features in `download_type4py_weights`
 - `generate_type4py_predictions` script for baseline data
+- Type4Py prediction verified, baseline set  
+
+### 11/18
+- updated `preanalysis/run.py` and `analysis/run.py` to include Type4Py handling
+- `evaluation/eval.py` updated 
+- ran smoke test on Type4Py + TypeCare

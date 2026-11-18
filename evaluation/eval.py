@@ -278,7 +278,7 @@ class ProblemList:
         after_top_k_percent = [round(x, 1) for x in after_top_k_percent]
 
         diff_k = [after_top_k[i] - before_top_k[i] for i in range(15)]
-        diff_k_percent = [round((after_top_k_percent[i] - before_top_k_percent[i]) / before_top_k_percent[i] * 100, 1) for i in range(15)]
+        diff_k_percent = [round((after_top_k_percent[i] - before_top_k_percent[i]) / before_top_k_percent[i] * 100, 1) if before_top_k_percent[i] != 0 else "inf" for i in range(15)]
 
         return before_top_k, before_top_k_percent, after_top_k, after_top_k_percent, diff_k, diff_k_percent
 
@@ -293,7 +293,7 @@ class ProblemList:
         after_top_k_percent = [round(x, 1) for x in after_top_k_percent]
 
         diff_k = [after_top_k[i] - before_top_k[i] for i in range(15)]
-        diff_k_percent = [round((after_top_k_percent[i] - before_top_k_percent[i]) / before_top_k_percent[i] * 100, 1) for i in range(15)]
+        diff_k_percent = [round((after_top_k_percent[i] - before_top_k_percent[i]) / before_top_k_percent[i] * 100, 1) if before_top_k_percent[i] != 0 else "inf" for i in range(15)]
 
         print(
             tabulate([["Top 1", before_top_k[0], f"{before_top_k_percent[0]}%", after_top_k[0], f"{after_top_k_percent[0]}%", f"{diff_k_percent[0]}%"],
