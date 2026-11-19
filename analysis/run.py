@@ -1633,6 +1633,23 @@ def analysis_example():
     example_analysis.print_top_k()
 
 
+def evaluate_type4py():
+    with open(TYPE4PY_OUTPUT_PATH, 'rb') as f:
+        type4py_analysis = pickle.load(f)
+
+    print("=== Type4Py Top K ===")
+    type4py_analysis.print_top_k()
+    print()
+    print("=== Type4Py Base Top K ===")
+    type4py_analysis.print_base_top_k()
+    print()
+    print("=== Type4Py Categorized Top K ===")
+    type4py_analysis.print_categorized_top_k()
+    print()
+    print("=== Type4Py Argument and Return Top K ===")
+    type4py_analysis.print_arg_ret_top_k()
+
+
 def evaluate():
     with open(TYPET5_OUTPUT_PATH, 'rb') as f:
         typet5_analysis = pickle.load(f)
@@ -1670,7 +1687,15 @@ if __name__ == "__main__":
     args = argument_parser.parse_args()
 
     if args.evaluate:
-        evaluate()
+        if args.tool == "type4py":
+            evaluate_type4py()
+        elif args.tool == "typet5":
+            evaluate_typet5()
+        else:
+            evaluate()
+            if os.path.exists(TYPE4PY_OUTPUT_PATH):
+                print()
+                evaluate_type4py()
         exit(0)
 
     if args.all:

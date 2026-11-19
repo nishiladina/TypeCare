@@ -1,9 +1,9 @@
 __pycache__
 results/*
 other_script/*
-output
 output/*
 *.pkl
+!output/type4py_result.pkl
 *.parquet
 *.log
 copy/*
@@ -20,7 +20,8 @@ prediction/Tiger
 prediction/TypeGen
 prediction/TypeT5
 prediction/typesim_model
-prediction/Type4Py
+prediction/Type4Py/*
+!prediction/Type4Py/transformed_result.json
 train_data.parquet
 ret_test_data.parquet
 ret_train_data.parquet
@@ -36,6 +37,7 @@ TypeT5
 BetterTypes4Py/repos/*
 scripts/*
 .gitattributes
+t4py_model_files/
 
 # Include requirements
 !requirements.txt
